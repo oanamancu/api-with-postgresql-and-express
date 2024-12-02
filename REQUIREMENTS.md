@@ -5,20 +5,20 @@ These are the notes from a meeting with the frontend developer that describe wha
 
 ## API Endpoints
 #### Products
-- Index 
-- Show
-- Create [token required]
-- [OPTIONAL] Top 5 most popular products 
-- [OPTIONAL] Products by category (args: product category)
+- Index - 'products' [GET] 
+- Show - 'products/:id' [GET] 
+- Create - [token required] 'products' [POST]
+- [OPTIONAL] Top 5 most popular products - 'products/top5' [GET] 
+- [OPTIONAL] Products by category (args: product category) - 'products/:productId/category' [GET]
 
 #### Users
-- Index [token required]
-- Show [token required]
-- Create N[token required]
+- Index [token required] - 'users' [GET]
+- Show [token required] - 'users/:id' [GET]
+- Create N[token required] - 'users' [POST]
 
 #### Orders
-- Current Order by user (args: user id)[token required]
-- [OPTIONAL] Completed Orders by user (args: user id)[token required]
+- Current Order by user (args: user id)[token required] 'orders/current/:userId' [GET]
+- [OPTIONAL] Completed Orders by user (args: user id)[token required] 'orders/all/:userId' [GET]
 
 ## Data Shapes
 #### Product
@@ -39,4 +39,14 @@ These are the notes from a meeting with the frontend developer that describe wha
 - quantity of each product in the order
 - user_id
 - status of order (active or complete)
+
+## Tables
+
+#### Table: Users (id:serial primary key, firstName:varchar, lastName:varchar, password:varchar)
+
+#### Table: Products (id:serial primary key, name:varchar, price:integer, category:varchar)
+
+#### Table: Orders (id:serial primary key, status:varchar, user_id:bigint [foreign key to users table])
+
+#### Table: Order_Products (id:serial primary key, quantity:integer, order_id:bigint [foreign key to orders table], product_id:bigint [foreign key to products table] 
 
