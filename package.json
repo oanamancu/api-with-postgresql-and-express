@@ -14,6 +14,7 @@
   "author": "Udacity",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "body-parser": "^1.19.0",
     "db-migrate": "^0.11.14",
     "db-migrate-pg": "^1.5.2",
@@ -23,18 +24,19 @@
     "typescript": "^4.1.3"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.0",
     "@types/jasmine": "^3.6.3",
-    "eslint": "^9.15.0",
-    "prettier": "3.3.3",
-    "typescript-eslint": "^8.15.0",
-    "globals": "^15.12.0",
+    "@types/node": "^22.9.2",
     "@types/pg": "^7.14.7",
+    "eslint": "^9.15.0",
+    "globals": "^15.12.0",
     "jasmine": "^3.6.4",
     "jasmine-spec-reporter": "^6.0.0",
     "jasmine-ts": "^0.3.0",
+    "prettier": "3.3.3",
     "ts-node": "^10.9.2",
-    "@types/node": "^22.9.2",
-    "tsc-watch": "^4.2.9"
+    "tsc-watch": "^4.2.9",
+    "typescript-eslint": "^8.15.0"
   }
 }
