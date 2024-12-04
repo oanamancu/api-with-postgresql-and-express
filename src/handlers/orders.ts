@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { OrderStore } from '../models/order';
+import {verifyAuthToken} from '../middleware/authorization'
 
 const store = new OrderStore();
 
@@ -79,13 +80,13 @@ const deleteProductFromOrder = async (req: Request, res: Response) => {
 };
 
 const orderRoutes = (app: express.Application) => {
-  app.post('/orders/:orderId/products', addProductToOrder);
-  app.get('/orders/current/:userId/users', currentOrderByUser);
-  app.get('/orders/completed/:userId/users', completedOrdersByUser);
-  app.get('/orders/:orderId/products', productsInOrder);
-  app.post('/orders', createNewOrderForUser);
-  app.post('/orders/:userId/users', addProductToUser);
-  app.delete('/orders/:orderId/products', deleteProductFromOrder);
+  app.post('/orders/:orderId/products', verifyAuthToken, addProductToOrder);
+  app.get('/orders/current/:userId/users', verifyAuthToken, currentOrderByUser);
+  app.get('/orders/completed/:userId/users', verifyAuthToken, completedOrdersByUser);
+  app.get('/orders/:orderId/products', verifyAuthToken, productsInOrder);
+  app.post('/orders', verifyAuthToken, createNewOrderForUser);
+  app.post('/orders/:userId/users', verifyAuthToken, addProductToUser);
+  app.delete('/orders/:orderId/products', verifyAuthToken, deleteProductFromOrder);
 };
 
 export default orderRoutes;
