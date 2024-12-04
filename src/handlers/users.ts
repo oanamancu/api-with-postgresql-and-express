@@ -1,216 +1,107 @@
 import express, { Request, Response } from 'express'
-import { Article, ArticleStore } from '../models/article'
+import { User, UserStore } from '../models/user'
 
-const store = new ArticleStore()
+const store = new UserStore()
 
-
-const index = (_req: Request, res: Response) => {
+const index = async (_req: Request, res: Response) => {
     try {
-        const articles = await store.index();
-        res.json(articles);
+        const users = await store.index();
+        res.status(200).json(users);
     } catch (err) {
         res.status(400)
         res.json(err)
     }
 }
   
-const show = (req: Request, res: Response) => {
+const show = async (req: Request, res: Response) => {
     try {
-       const article = await store.show(req.params.id);
-       res.json(article);
-    } catch (err) {
-       res.status(400)
-       res.json(err)
-    }
-}
-  
-const create = (req: Request, res: Response) => {
-    const article: Article = {
-      title: req.body.title,
-      content: req.body.content
-    }
-    try {
-       const result = await store.post(article);
-       res.json(result);
-    } catch (err) {
-       res.status(400)
-       res.json(err)
-    }
-}
-  
-const destroy = (req: Request, res: Response) => {
-    try {
-       const deleted = await store.delete(rez.params.id);
-       res.json(deleted);
+       const user = await store.show(req.params.id);
+       res.status(200).json(user);
     } catch (err) {
        res.status(400)
        res.json(err)
     }
 }
 
-
-const articleRoutes = (app: express.Application) => {
-    app.get('/articles', index);
-    app.get('/articles/:id', show);
-    app.delete('/articles/:id', destroy);
-    app.post('/articles', create);
-}
-
-export default articleRoutes
-
-
-//////////////////////////////////////////////////
-
-
-// @ts-ignore
-import Client from '../database'
-import User from '../database'
-import bcrypt from 'bcrypt'
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-export type User = {
-    id: number,
-    fisrtName: string,
-    lastName: string,
-    password: string
-}
-
-export class UserStore {
-    private static pepper = process.env.BCRYPT_PASSWORD;
-    private static saltRounds = Number(process.env.SALT_ROUNDS);
-
-    async create(u: User): Promise<User> {
-        try {
-          // @ts-ignore
-          const conn = await Client.connect()
-          const sql = 'INSERT INTO users (firstName, lastName, password) VALUES($1, $2, $3) RETURNING *'
-    
-          const hash = bcrypt.hashSync(
-            u.password + UserStore.pepper, 
-            UserStore.saltRounds
-          );
-    
-          const result = await conn.query(sql, [u.fisrtName, u.lastName, hash])
-          const user = result.rows[0]
-    
-          conn.release()
-    
-          return user
-        } catch(err) {
-          throw new Error(`unable create user (${u.fisrtName} ${u.lastName}): ${err}`)
-        } 
-    }
-
-    async authenticate(fisrtName: string, lastName: string, password: string): Promise<User | null> {
-        const conn = await Client.connect()
-        const sql = 'SELECT password FROM users WHERE firstName=($1) and lastName=($2)'
-    
-        const result = await conn.query(sql, [fisrtName, lastName])
-        
-        if(result.rows.length) {
-    
-          const user = result.rows[0]
-    
-          console.log(user)
-    
-          if (bcrypt.compareSync(password+UserStore.pepper, user.password)) {
-            return user
-          }
-        }
-    
-        return null
-    }
-
-      async index(): Promise<User[]> {
-        try {
-          // @ts-ignore
-          const conn = await Client.connect()
-          const sql = 'SELECT * FROM users'
-    
-          const result = await conn.query(sql)
-    
-          conn.release()
-    
-          return result.rows 
-        } catch (err) {
-          throw new Error(`Could not get users. Error: ${err}`)
-        }
-    }
-    
-      async show(id: string): Promise<User> {
-        try {
-        const sql = 'SELECT * FROM users WHERE id=($1)'
-        // @ts-ignore
-        const conn = await Client.connect()
-    
-        const result = await conn.query(sql, [id])
-    
-        conn.release()
-    
-        return result.rows[0]
-        } catch (err) {
-            throw new Error(`Could not find user ${id}. Error: ${err}`)
-        }
-    }
-}
-
-/*const create = async (req: Request, res: Response) => {
-    const user: User = {
-        username: req.body.username,
-        password: req.body.password,
-    }
-    try {
-        const newUser = await store.create(user)
-        const token = jwt.sign({ user: newUser }, process.env.TOKEN_SECRET);
-        res.json(token)
-    } catch(err) {
-        res.status(400)
-        res.json(err + user)
-    }
+const create = async (req: Request, res: Response) => {
+  const user: User = {
+      fisrtName: req.body.firstName,
+      lastName: req.body.lastName,
+      password: req.body.password
+  }
+  try {
+      const newUser = await store.create(user)
+      const token = jwt.sign({ user: newUser }, process.env.TOKEN_SECRET);
+      res.status(201).json(token)
+  } catch(err) {
+      res.status(400)
+      res.json(String(err) + user)
+  }
 }
 
 const authenticate = async (req: Request, res: Response) => {
-    const user: User = {
-      username: req.body.username,
-      password: req.body.password,
-    }
-    try {
-        const u = await store.authenticate(user.username, user.password)
-        const token = jwt.sign({ user: u }, process.env.TOKEN_SECRET);
-        res.json(token)
-    } catch(error) {
-        res.status(401)
-        res.json({ error })
-    }
+  const user: User = {
+    fisrtName: req.body.firstName,
+    lastName: req.body.lastName,
+    password: req.body.password
+  }
+  try {
+      const u = await store.authenticate(user.fisrtName, user.lastName, user.password)
+      const token = jwt.sign({ user: u }, process.env.TOKEN_SECRET);
+      res.status(200).json(token)
+  } catch(error) {
+      res.status(401)
+      res.json({ error })
+  }
+}
+
+const update = async (req: Request, res: Response) => {
+  const user: User = {
+      id: parseInt(req.params.id),
+      fisrtName: req.body.firstName,
+      lastName: req.body.lastName,
+      password: req.body.password
+  }
+  try {
+      const authorizationHeader = req.headers.authorization
+      const token = authorizationHeader.split(' ')[1]
+      const decoded = jwt.verify(token, process.env.TOKEN_SECRET)
+      if(decoded.id !== user.id) {
+          throw new Error('User id does not match!')
+      }
+  } catch(err) {
+      res.status(401)
+      res.json(err)
+      return
   }
 
-  const update = async (req: Request, res: Response) => {
-    const user: User = {
-        id: parseInt(req.params.id),
-        username: req.body.username,
-        password: req.body.password,
-    }
+  try {
+      const updated = await store.create(user)
+      res.status(200).json(updated)
+  } catch(err) {
+      res.status(400)
+      res.json(String(err) + user)
+  }
+}
+   
+const destroy = async (req: Request, res: Response) => {
     try {
-        const authorizationHeader = req.headers.authorization
-        const token = authorizationHeader.split(' ')[1]
-        const decoded = jwt.verify(token, process.env.TOKEN_SECRET)
-        if(decoded.id !== user.id) {
-            throw new Error('User id does not match!')
-        }
-    } catch(err) {
-        res.status(401)
-        res.json(err)
-        return
-    }
-
-    try {
-        const updated = await store.create(user)
-        res.json(updated)
-    } catch(err) {
-        res.status(400)
-        res.json(err + user)
+       const deleted = await store.delete(req.params.id);
+       res.status(200).json(deleted);
+    } catch (err) {
+       res.status(400)
+       res.json(err)
     }
 }
-    */
+
+
+const usersRoutes = (app: express.Application) => {
+    app.get('/users', index);
+    app.get('/users/:id', show);
+    app.delete('/users/:id', destroy);
+    app.post('/users', create);
+    app.put('/users', update);
+    app.post('/users/authenticate', authenticate);
+}
+
+export default usersRoutes

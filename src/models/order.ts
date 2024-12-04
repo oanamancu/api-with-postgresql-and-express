@@ -2,7 +2,7 @@
 import Client from "../database";
 
 export type Order = {
-    id: number,
+    id?: number,
     status: string,
     userId: number
 }
@@ -76,6 +76,24 @@ export class OrderStore {
         }
     }
 
+    async productsInOrder(orderId: string) {
+      try {
+          //@ts-ignore
+          const conn = await Client.connect();
+          const sql = `select name, quantity from orders inner join order_products where orders.id = order_products.id and order_id = ($1)`;
+          const result = await conn.query(sql, [orderId]);
+          conn.release();
+          if (result.rowCount > 0 ) {
+              return result;
+          }
+          else {
+             return null;
+          }
+      } catch(err) {
+          throw(new Error(`${err}`));
+      }
+  }
+
     async completedOrdersByUser(userId: string) : Promise<Order[]> {
         try {
             //@ts-ignore
@@ -112,5 +130,19 @@ export class OrderStore {
         } catch (err) {
             throw new Error(`Could not add product for user ${userId}: ${err}`)
         }
+    }
+
+    async deleteProductFromOrder(orderId:string, productId:string) {
+      try {  
+        const sql = 'DELETE FROM order_products where order_id = ($1) and product_id = ($2) RETURNING *'
+        //@ts-ignore
+        const conn = await Client.connect()
+        const result = await conn.query(sql, [orderId, productId])
+        const order = result.rows[0]
+        conn.release()
+        return order
+      } catch (err) {
+        throw new Error(`Could not delete product: ${err}`)
       }
+    }
 }

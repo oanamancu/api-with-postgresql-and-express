@@ -2,7 +2,7 @@
 import Client from '../database'
 
 export type Product = {
-     id: number;
+     id?: number;
      name: string;
      category: string;
      price: number;
@@ -104,5 +104,5 @@ export class ProductStore {
         } catch(err) {
             throw new Error(`can't get top 5 products: ${err}`);
         }
-    }
+  }
 }
