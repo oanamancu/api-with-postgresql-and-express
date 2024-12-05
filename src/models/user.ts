@@ -1,3 +1,4 @@
+//@ts-expect-error any
 import Client from '../database';
 import User from '../database';
 import bcrypt from 'bcrypt';
@@ -18,6 +19,7 @@ export class UserStore {
 
   async create(u: User): Promise<User> {
     try {
+      //@ts-expect-error any
       const conn = await Client.connect();
       const sql =
         'INSERT INTO users (firstName, lastName, password) VALUES($1, $2, $3) RETURNING *';
@@ -42,6 +44,7 @@ export class UserStore {
 
   async update(u: User): Promise<User> {
     try {
+      //@ts-expect-error any
       const conn = await Client.connect();
       const sql =
         'update users set firstName = ($1), lastName = ($2), password = ($3) where id = ($4) RETURNING *';
@@ -67,6 +70,7 @@ export class UserStore {
     id: number | undefined,
     password: string
   ): Promise<User | null> {
+    //@ts-expect-error any
     const conn = await Client.connect();
     const sql =
       'SELECT * FROM users WHERE id=($1)';
@@ -88,6 +92,7 @@ export class UserStore {
 
   async index(): Promise<User[]> {
     try {
+      //@ts-expect-error any
       const conn = await Client.connect();
       const sql = 'SELECT * FROM users';
 
@@ -104,6 +109,7 @@ export class UserStore {
   async show(id: string): Promise<User> {
     try {
       const sql = 'SELECT * FROM users WHERE id=($1)';
+      //@ts-expect-error any
       const conn = await Client.connect();
 
       const result = await conn.query(sql, [id]);
@@ -119,6 +125,7 @@ export class UserStore {
   async delete(id: string): Promise<User> {
     try {
       const sql = 'DELETE FROM users WHERE id=($1)';
+      //@ts-expect-error any
       const conn = await Client.connect();
 
       const result = await conn.query(sql, [id]);
