@@ -40,16 +40,38 @@ export class UserStore {
     }
   }
 
+  async update(u: User): Promise<User> {
+    try {
+      const conn = await Client.connect();
+      const sql =
+        'update users set firstName = ($1), lastName = ($2), password = ($3) where id = ($4) RETURNING *';
+      const hash = bcrypt.hashSync(
+        u.password + UserStore.pepper,
+        UserStore.saltRounds
+      );
+
+      const result = await conn.query(sql, [u.fisrtName, u.lastName, hash, u.id]);
+      const user = result.rows[0];
+
+      conn.release();
+
+      return user;
+    } catch (err) {
+      throw new Error(
+        `unable to update user (${u.id}): ${err}`
+      );
+    }
+  }
+
   async authenticate(
-    fisrtName: string,
-    lastName: string,
+    id: number | undefined,
     password: string
   ): Promise<User | null> {
     const conn = await Client.connect();
     const sql =
-      'SELECT password FROM users WHERE firstName=($1) and lastName=($2)';
+      'SELECT * FROM users WHERE id=($1)';
 
-    const result = await conn.query(sql, [fisrtName, lastName]);
+    const result = await conn.query(sql, [id]);
 
     if (result.rows.length) {
       const user = result.rows[0];

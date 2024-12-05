@@ -2,8 +2,7 @@ import express, { Request, Response } from 'express';
 import { User, UserStore } from '../models/user';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import { verifyAuthToken } from '../middleware/authorization'
-
+import { verifyAuthToken } from '../middleware/authorization';
 
 const store = new UserStore();
 dotenv.config();
@@ -43,14 +42,14 @@ const create = async (req: Request, res: Response) => {
 
 const authenticate = async (req: Request, res: Response) => {
   const user: User = {
+    id: parseInt(req.params.id),
     fisrtName: req.body.firstName,
     lastName: req.body.lastName,
     password: req.body.password
   };
   try {
     const u = await store.authenticate(
-      user.fisrtName,
-      user.lastName,
+      user.id,
       user.password
     );
     const token = jwt.sign({ user: u }, String(process.env.TOKEN_SECRET));
@@ -68,15 +67,14 @@ const update = async (req: Request, res: Response) => {
     password: req.body.password
   };
 
-  if (req.body.decoded.id !== user.id) {
-    throw new Error('User id does not match!');
-  }
-
-  try {
-    const updated = await store.create(user);
+  try { 
+    if (req.body.decoded.user.id !== user.id) {
+      throw new Error('User id does not match!');
+    }
+    const updated = await store.update(user);
     res.status(200).json(updated);
   } catch (err) {
-    res.status(400).json(String(err) + user);
+    res.status(400).json(String(err) + user.id);
   }
 };
 
@@ -94,8 +92,8 @@ const usersRoutes = (app: express.Application) => {
   app.get('/users/:id', verifyAuthToken, show);
   app.delete('/users/:id', verifyAuthToken, destroy);
   app.post('/users', verifyAuthToken, create);
-  app.put('/users', verifyAuthToken, update);
-  app.post('/users/authenticate', authenticate);
+  app.put('/users/:id', verifyAuthToken, update);
+  app.post('/users/authenticate/:id', authenticate);
 };
 
 export default usersRoutes;

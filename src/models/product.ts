@@ -58,7 +58,7 @@ export class ProductStore {
 
   async delete(id: string): Promise<Product> {
     try {
-      const sql = 'DELETE FROM products WHERE id=($1)';
+      const sql = 'DELETE FROM products WHERE id=($1) RETURNING *';
       const conn = await Client.connect();
 
       const result = await conn.query(sql, [id]);
@@ -92,7 +92,7 @@ export class ProductStore {
 
   async top5Products(): Promise<Product[]> {
     try {
-      const sql = `select products.id, products.name from products inner join order_products where products.id = order_products.id group by products.id, products.name order by count(products.id) desc limit 5`;
+      const sql = `select products.id, products.name from products inner join order_products on products.id = order_products.id group by products.id, products.name order by count(products.id) desc limit 5`;
       const conn = await Client.connect();
       const result = await conn.query(sql);
       return result.rows;

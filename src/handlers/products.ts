@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import { Product, ProductStore } from '../models/product';
-import { verifyAuthToken } from '../middleware/authorization'
+import { verifyAuthToken } from '../middleware/authorization';
 
 const store = new ProductStore();
 
@@ -39,7 +39,7 @@ const create = async (req: Request, res: Response) => {
 };
 
 const destroy = async (req: Request, res: Response) => {
-  const deleted = await store.delete(req.body.id);
+  const deleted = await store.delete(req.params.id);
   res.status(200).json(deleted);
 };
 
@@ -52,22 +52,23 @@ const productsByCategory = async (req: Request, res: Response) => {
   }
 };
 
-const top5Products = async (_req: Request, res: Response) => {
-  try {
+const topProducts = async (_req: Request, res: Response) => { console.log('aici');
+  try { 
     const products = await store.top5Products();
     res.status(200).json(products);
-  } catch (err) {
+  } catch (err) { 
     res.status(500).json(err);
   }
 };
+
 
 const productRoutes = (app: express.Application) => {
   app.get('/products', index);
   app.get('/products/:id', show);
   app.post('/products', verifyAuthToken, create);
   app.delete('/products/:id', verifyAuthToken, destroy);
-  app.get('/products/:category', productsByCategory);
-  app.get('products/top5', top5Products);
+  app.get('/products/category/:category', productsByCategory);
+  app.get('/products_top', topProducts);
 };
 
 export default productRoutes;

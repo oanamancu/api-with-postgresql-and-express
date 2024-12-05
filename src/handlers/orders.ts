@@ -1,11 +1,11 @@
 import express, { Request, Response } from 'express';
 import { OrderStore } from '../models/order';
-import {verifyAuthToken} from '../middleware/authorization'
+import { verifyAuthToken } from '../middleware/authorization';
 
 const store = new OrderStore();
 
 const addProductToOrder = async (_req: Request, res: Response) => {
-  const orderId: string = _req.params.id;
+  const orderId: string = _req.params.orderId;
   const productId: string = _req.body.productId;
   const quantity: number = parseInt(_req.body.quantity);
 
@@ -18,10 +18,10 @@ const addProductToOrder = async (_req: Request, res: Response) => {
   }
 };
 
-const currentOrderByUser = async (req: Request, res: Response) => {
+const currentOrdersByUser = async (req: Request, res: Response) => {
   try {
-    const order = store.currentOrderByUser(req.params.userId);
-    res.status(200).json(order);
+    const orders = await store.currentOrdersByUser(req.params.userId);
+    res.status(200).json(orders);
   } catch (err) {
     res.json(err);
   }
@@ -29,7 +29,7 @@ const currentOrderByUser = async (req: Request, res: Response) => {
 
 const productsInOrder = async (req: Request, res: Response) => {
   try {
-    const products = store.productsInOrder(req.params.orderId);
+    const products = await store.productsInOrder(req.params.orderId);
     res.status(200).json(products);
   } catch (err) {
     res.json(err);
@@ -38,7 +38,7 @@ const productsInOrder = async (req: Request, res: Response) => {
 
 const completedOrdersByUser = async (req: Request, res: Response) => {
   try {
-    const orders = store.completedOrdersByUser(req.params.userId);
+    const orders = await store.completedOrdersByUser(req.params.userId);
     res.status(200).json(orders);
   } catch (err) {
     res.json(err);
@@ -47,21 +47,9 @@ const completedOrdersByUser = async (req: Request, res: Response) => {
 
 const createNewOrderForUser = async (req: Request, res: Response) => {
   try {
-    const order = store.createNewOrderForUser(req.params.userId);
+    const order = await store.createNewOrderForUser(req.body.decoded.user.id);
+    console.log(req.body.decoded.user.id);
     res.status(201).json(order);
-  } catch (err) {
-    res.json(err);
-  }
-};
-
-const addProductToUser = async (req: Request, res: Response) => {
-  try {
-    store.addProductToUser(
-      req.params.userId,
-      parseInt(req.body.quantity),
-      req.body.productId
-    );
-    res.status(201).json('success');
   } catch (err) {
     res.json(err);
   }
@@ -69,7 +57,7 @@ const addProductToUser = async (req: Request, res: Response) => {
 
 const deleteProductFromOrder = async (req: Request, res: Response) => {
   try {
-    const order = store.deleteProductFromOrder(
+    const order = await store.deleteProductFromOrder(
       req.params.orderId,
       req.params.productId
     );
@@ -79,14 +67,30 @@ const deleteProductFromOrder = async (req: Request, res: Response) => {
   }
 };
 
+const markOrderAsComplete = async (req: Request, res: Response) => {
+  try {
+    const order = await store.markOrderAsComplete(req.params.id);
+    res.status(200).json(order);
+  } catch (err) {
+    res.json(err);
+  }
+};
+
 const orderRoutes = (app: express.Application) => {
-  app.post('/orders/:orderId/products', verifyAuthToken, addProductToOrder);
-  app.get('/orders/current/:userId/users', verifyAuthToken, currentOrderByUser);
-  app.get('/orders/completed/:userId/users', verifyAuthToken, completedOrdersByUser);
-  app.get('/orders/:orderId/products', verifyAuthToken, productsInOrder);
-  app.post('/orders', verifyAuthToken, createNewOrderForUser);
-  app.post('/orders/:userId/users', verifyAuthToken, addProductToUser);
-  app.delete('/orders/:orderId/products', verifyAuthToken, deleteProductFromOrder);
+  app.post('/orders/:orderId/products', verifyAuthToken, addProductToOrder); //
+  app.get('/orders/current/:userId/users', verifyAuthToken, currentOrdersByUser); //
+  app.get('/orders/completed/:userId/users',
+    verifyAuthToken,
+    completedOrdersByUser
+  ); //
+  app.get('/orders/:orderId/products', verifyAuthToken, productsInOrder); //
+  app.post('/orders', verifyAuthToken, createNewOrderForUser); //
+  app.delete(
+    '/orders/:orderId/products/:productId',
+    verifyAuthToken,
+    deleteProductFromOrder
+  ); //
+  app.put('/orders/complete/:id',markOrderAsComplete); //
 };
 
 export default orderRoutes;

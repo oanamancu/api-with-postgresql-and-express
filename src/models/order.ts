@@ -57,17 +57,13 @@ export class OrderStore {
     }
   }
 
-  async currentOrderByUser(userId: string): Promise<Order | null> {
+  async currentOrdersByUser(userId: string): Promise<Order[]> {
     try {
       const conn = await Client.connect();
       const sql = `select * from orders where user_id = ($1) and status='active'`;
       const result = await conn.query(sql, [userId]);
       conn.release();
-      if (result.rowCount > 0) {
-        return result.rows[0];
-      } else {
-        return null;
-      }
+      return result.rows;
     } catch (err) {
       throw new Error(`${err}`);
     }
@@ -76,11 +72,11 @@ export class OrderStore {
   async productsInOrder(orderId: string) {
     try {
       const conn = await Client.connect();
-      const sql = `select name, quantity from orders inner join order_products where orders.id = order_products.id and order_id = ($1)`;
+      const sql = ` select name, quantity from products inner join order_products on products.id = order_products.product_id where order_id = ($1)`;
       const result = await conn.query(sql, [orderId]);
       conn.release();
       if (result.rowCount > 0) {
-        return result;
+        return result.rows;
       } else {
         return null;
       }
@@ -111,24 +107,7 @@ export class OrderStore {
       conn.release();
       return order;
     } catch (err) {
-      throw new Error(`Could create new order: ${err}`);
-    }
-  }
-
-  //method to attach a product to a new or old active user's order
-  async addProductToUser(
-    userId: string,
-    quantity: number,
-    productId: string
-  ): Promise<void> {
-    try {
-      let order = await this.currentOrderByUser(userId);
-      if (order === null) {
-        order = await this.createNewOrderForUser(userId);
-      }
-      await this.addProduct(quantity, String(order.id), productId);
-    } catch (err) {
-      throw new Error(`Could not add product for user ${userId}: ${err}`);
+      throw new Error(`Could not create new order: ${err}`);
     }
   }
 
@@ -143,6 +122,20 @@ export class OrderStore {
       return order;
     } catch (err) {
       throw new Error(`Could not delete product: ${err}`);
+    }
+  }
+
+  async markOrderAsComplete(orderId: string) {
+    try {
+      const sql =
+        `UPDATE orders set status = 'complete' where id = ($1) RETURNING *`;
+      const conn = await Client.connect();
+      const result = await conn.query(sql, [orderId]);
+      const order = result.rows[0]; console.log(result.rowCount);
+      conn.release();
+      return order;
+    } catch (err) {
+      throw new Error(`Could not update order: ${err}`);
     }
   }
 }

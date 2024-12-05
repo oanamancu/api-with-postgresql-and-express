@@ -5,20 +5,28 @@ These are the notes from a meeting with the frontend developer that describe wha
 
 ## API Endpoints
 #### Products
-- Index - 'products' [GET] //
-- Show - 'products/:id' [GET] //
-- Create - [token required] 'products' [POST] //
-- [OPTIONAL] Top 5 most popular products - 'products/top5' [GET] 
-- [OPTIONAL] Products by category (args: product category) - 'products/:productId/category' [GET] // ??
+- Index - 'products' [GET]
+- Show - 'products/:id' [GET]
+- Create - [token required] 'products' [POST] | body json: name, price, category
+- [OPTIONAL] Top 5 most popular products - '/products_top' [GET] 
+- [OPTIONAL] Products by category (args: product category) - 'products/:productId/category' [GET]
+- Destroy [token required] - '/products/:id' [DELETE] 
 
 #### Users
-- Index [token required] - 'users' [GET] //
-- Show [token required] - 'users/:id' [GET] //
-- Create N[token required] - 'users' [POST] //
+- authenticate => token - '/users/authenticate/:id' [POST] | body json: firstName, lastName, password
+- Index [token required] - '/users' [GET] 
+- Show [token required] - '/users/:id' [GET] 
+- Create N[token required] - '/users' [POST] | body json: firstName, lastName, password
+- Destroy [token required] - '/users/:id' [DELETE]
 
 #### Orders
-- Current Order by user (args: user id)[token required] 'orders/current/:userId' [GET] //
-- [OPTIONAL] Completed Orders by user (args: user id)[token required] 'orders/all/:userId' [GET] //
+- Current Order by user (args: user id)[token required] - '/orders/current/:userId/users' [GET] 
+- [OPTIONAL] Completed Orders by user (args: user id)[token required] - '/orders/completed/:userId/users' [GET]
+- add new active order to logged in user [token required]  - '/orders' [POST]
+- mark order as complete [token required] - '/orders/complete/:id' [PUT]
+- add product to order [token required] - '/orders/:orderId/products' [POST] | body json: productId, quantity
+- show products from an order [token required] - '/orders/:orderId/products' [GET]
+- delete product from order [token required] - '/orders/complete/:id' [DELETE]
 
 ## Data Shapes
 #### Product

@@ -9,7 +9,9 @@
     "test": "jasmine-ts",
     "tsc": "tsc",
     "lint": "npx eslint src/**/*.ts",
-    "prettier": "prettier --config .prettierrc \"src\\**\\*.ts\" --write"
+    "prettier": "prettier --config .prettierrc \"src\\**\\*.ts\" --write",
+    "db-up": "db-migrate up",
+    "db-down": "db-migrate -c 4 down"
   },
   "author": "Udacity",
   "license": "ISC",
