@@ -91,7 +91,7 @@ const usersRoutes = (app: express.Application) => {
   app.get('/users', verifyAuthToken, index);
   app.get('/users/:id', verifyAuthToken, show);
   app.delete('/users/:id', verifyAuthToken, destroy);
-  app.post('/users', verifyAuthToken, create);
+  app.post('/users', create);
   app.put('/users/:id', verifyAuthToken, update);
   app.post('/users/authenticate/:id', authenticate);
 };
