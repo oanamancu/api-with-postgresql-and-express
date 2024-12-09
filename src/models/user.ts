@@ -1,6 +1,4 @@
-//@ts-expect-error any
-import Client from '../database';
-import User from '../database';
+import Client from './../database';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 
@@ -8,7 +6,7 @@ dotenv.config();
 
 export type User = {
   id?: number;
-  fisrtName: string;
+  firstName: string;
   lastName: string;
   password: string;
 };
@@ -17,9 +15,8 @@ export class UserStore {
   private static pepper = process.env.BCRYPT_PASSWORD;
   private static saltRounds = Number(process.env.SALT_ROUNDS);
 
-  async create(u: User): Promise<User> {
+  async create(u: User) {
     try {
-      //@ts-expect-error any
       const conn = await Client.connect();
       const sql =
         'INSERT INTO users (firstName, lastName, password) VALUES($1, $2, $3) RETURNING *';
@@ -29,7 +26,7 @@ export class UserStore {
         UserStore.saltRounds
       );
 
-      const result = await conn.query(sql, [u.fisrtName, u.lastName, hash]);
+      const result = await conn.query(sql, [u.firstName, u.lastName, hash]);
       const user = result.rows[0];
 
       conn.release();
@@ -37,14 +34,13 @@ export class UserStore {
       return user;
     } catch (err) {
       throw new Error(
-        `unable create user (${u.fisrtName} ${u.lastName}): ${err}`
+        `unable create user (${u.firstName} ${u.lastName}): ${err}`
       );
     }
   }
 
-  async update(u: User): Promise<User> {
+  async update(u: User) {
     try {
-      //@ts-expect-error any
       const conn = await Client.connect();
       const sql =
         'update users set firstName = ($1), lastName = ($2), password = ($3) where id = ($4) RETURNING *';
@@ -53,7 +49,7 @@ export class UserStore {
         UserStore.saltRounds
       );
 
-      const result = await conn.query(sql, [u.fisrtName, u.lastName, hash, u.id]);
+      const result = await conn.query(sql, [u.firstName, u.lastName, hash, u.id]);
       const user = result.rows[0];
 
       conn.release();
@@ -69,8 +65,7 @@ export class UserStore {
   async authenticate(
     id: number | undefined,
     password: string
-  ): Promise<User | null> {
-    //@ts-expect-error any
+  ) {
     const conn = await Client.connect();
     const sql =
       'SELECT * FROM users WHERE id=($1)';
@@ -80,8 +75,6 @@ export class UserStore {
     if (result.rows.length) {
       const user = result.rows[0];
 
-      console.log(user);
-
       if (bcrypt.compareSync(password + UserStore.pepper, user.password)) {
         return user;
       }
@@ -90,9 +83,8 @@ export class UserStore {
     return null;
   }
 
-  async index(): Promise<User[]> {
+  async index() {
     try {
-      //@ts-expect-error any
       const conn = await Client.connect();
       const sql = 'SELECT * FROM users';
 
@@ -106,10 +98,9 @@ export class UserStore {
     }
   }
 
-  async show(id: string): Promise<User> {
+  async show(id: string) {
     try {
       const sql = 'SELECT * FROM users WHERE id=($1)';
-      //@ts-expect-error any
       const conn = await Client.connect();
 
       const result = await conn.query(sql, [id]);
@@ -125,7 +116,6 @@ export class UserStore {
   async delete(id: string): Promise<User> {
     try {
       const sql = 'DELETE FROM users WHERE id=($1)';
-      //@ts-expect-error any
       const conn = await Client.connect();
 
       const result = await conn.query(sql, [id]);

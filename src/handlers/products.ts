@@ -52,7 +52,7 @@ const productsByCategory = async (req: Request, res: Response) => {
   }
 };
 
-const topProducts = async (_req: Request, res: Response) => { console.log('aici');
+const topProducts = async (_req: Request, res: Response) => {
   try { 
     const products = await store.top5Products();
     res.status(200).json(products);

@@ -1,4 +1,4 @@
-//@ts-expect-error any
+import { Console } from 'console';
 import Client from '../database';
 
 export type Order = {
@@ -13,7 +13,6 @@ export class OrderStore {
     try {
       const ordersql = 'SELECT * FROM orders WHERE id=($1)';
 
-      //@ts-expect-error any
       const conn = await Client.connect();
 
       const result = await conn.query(ordersql, [orderId]);
@@ -37,13 +36,14 @@ export class OrderStore {
     quantity: number,
     orderId: string,
     productId: string
-  ): Promise<Order> {
+  ) {
     try {
-      await this.checkOpenOrder(orderId);
-
+      const isOpen = await this.checkOpenOrder(orderId);
+      if (!isOpen) {
+        throw new Error ('order is closed');
+      }
       const sql =
         'INSERT INTO order_products (quantity, order_id, product_id) VALUES($1, $2, $3) RETURNING *';
-      //@ts-expect-error any
       const conn = await Client.connect();
 
       const result = await conn.query(sql, [quantity, orderId, productId]);
@@ -62,7 +62,6 @@ export class OrderStore {
 
   async currentOrdersByUser(userId: string): Promise<Order[]> {
     try {
-      //@ts-expect-error any
       const conn = await Client.connect();
       const sql = `select * from orders where user_id = ($1) and status='active'`;
       const result = await conn.query(sql, [userId]);
@@ -75,9 +74,8 @@ export class OrderStore {
 
   async productsInOrder(orderId: string) {
     try {
-      //@ts-expect-error any
       const conn = await Client.connect();
-      const sql = ` select name, quantity from products inner join order_products on products.id = order_products.product_id where order_id = ($1)`;
+      const sql = ` select products.id, name, quantity from products inner join order_products on products.id = order_products.product_id where order_id = ($1)`;
       const result = await conn.query(sql, [orderId]);
       conn.release();
       if (result.rowCount > 0) {
@@ -92,7 +90,6 @@ export class OrderStore {
 
   async completedOrdersByUser(userId: string): Promise<Order[]> {
     try {
-      //@ts-expect-error any
       const conn = await Client.connect();
       const sql = `select * from orders where user_id = ($1) and status='complete'`;
       const result = await conn.query(sql, [userId]);
@@ -107,7 +104,6 @@ export class OrderStore {
     try {
       const sql =
         'INSERT INTO orders (status, user_id) VALUES($1, $2) RETURNING *';
-      //@ts-expect-error any
       const conn = await Client.connect();
       const result = await conn.query(sql, ['active', userId]);
       const order = result.rows[0];
@@ -122,7 +118,6 @@ export class OrderStore {
     try {
       const sql =
         'DELETE FROM order_products where order_id = ($1) and product_id = ($2) RETURNING *';
-      //@ts-expect-error any
       const conn = await Client.connect();
       const result = await conn.query(sql, [orderId, productId]);
       const order = result.rows[0];
@@ -137,7 +132,6 @@ export class OrderStore {
     try {
       const sql =
         `UPDATE orders set status = 'complete' where id = ($1) RETURNING *`;
-      //@ts-expect-error any
       const conn = await Client.connect();
       const result = await conn.query(sql, [orderId]);
       const order = result.rows[0]; console.log(result.rowCount);
@@ -145,6 +139,23 @@ export class OrderStore {
       return order;
     } catch (err) {
       throw new Error(`Could not update order: ${err}`);
+    }
+  }
+
+  async delete(id: string): Promise<Order> {
+    try {
+      const sql = 'DELETE FROM products WHERE id=($1) RETURNING *';
+      const conn = await Client.connect();
+
+      const result = await conn.query(sql, [id]);
+
+      const order = result.rows[0];
+
+      conn.release();
+
+      return order;
+    } catch (err) {
+      throw new Error(`Could not delete order ${id}. Error: ${err}`);
     }
   }
 }

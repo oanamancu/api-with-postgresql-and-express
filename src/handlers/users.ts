@@ -27,7 +27,7 @@ const show = async (req: Request, res: Response) => {
 
 const create = async (req: Request, res: Response) => {
   const user: User = {
-    fisrtName: req.body.firstName,
+    firstName: req.body.firstName,
     lastName: req.body.lastName,
     password: req.body.password
   };
@@ -43,7 +43,7 @@ const create = async (req: Request, res: Response) => {
 const authenticate = async (req: Request, res: Response) => {
   const user: User = {
     id: parseInt(req.params.id),
-    fisrtName: req.body.firstName,
+    firstName: req.body.firstName,
     lastName: req.body.lastName,
     password: req.body.password
   };
@@ -62,7 +62,7 @@ const authenticate = async (req: Request, res: Response) => {
 const update = async (req: Request, res: Response) => {
   const user: User = {
     id: parseInt(req.params.id),
-    fisrtName: req.body.firstName,
+    firstName: req.body.firstName,
     lastName: req.body.lastName,
     password: req.body.password
   };

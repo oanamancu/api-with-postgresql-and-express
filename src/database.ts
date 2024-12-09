@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import { Pool } from 'pg';
+import 'dotenv/config';
 
 dotenv.config();
 
@@ -9,29 +10,28 @@ dotenv.config();
     POSTGRES_USER,
     POSTGRES_PASSWORD,
     POSTGRES_TEST_DB,
-    ENV,
-  } = process.env
+    ENV
+  } = process.env;
 
-let client;
+  let Client: Pool = new Pool();
+  console.log('current env mode', ENV);
 
-console.log(ENV)
+  if(ENV === 'dev') {
+    Client = new Pool({
+      host: POSTGRES_HOST,
+      database: POSTGRES_DB,
+      user: POSTGRES_USER,
+      password: POSTGRES_PASSWORD
+    })
+  }
 
-if(ENV === 'test') {
-  client = new Pool({
-    host: POSTGRES_HOST,
-    database: POSTGRES_TEST_DB,
-    user: POSTGRES_USER,
-    password: POSTGRES_PASSWORD,
-  })
-}
+  if(ENV?.trim() === 'test') { console.log('AICI!!!');
+    Client = new Pool({
+      host: POSTGRES_HOST,
+      database: POSTGRES_TEST_DB,
+      password: POSTGRES_PASSWORD,
+      user: POSTGRES_USER
+    })
+  }
 
-if(ENV === 'dev') {
-  client = new Pool({
-    host: POSTGRES_HOST,
-    database: POSTGRES_DB,
-    user: POSTGRES_USER,
-    password: POSTGRES_PASSWORD,
-  })
-}
-
-export default client;
+export default Client;

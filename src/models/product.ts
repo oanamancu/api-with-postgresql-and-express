@@ -1,4 +1,3 @@
-//@ts-expect-error any
 import Client from '../database';
 
 export type Product = {
@@ -11,7 +10,6 @@ export type Product = {
 export class ProductStore {
   async index(): Promise<Product[]> {
     try {
-      //@ts-expect-error any
       const conn = await Client.connect();
       const sql = 'SELECT * FROM products';
 
@@ -28,7 +26,6 @@ export class ProductStore {
   async show(id: string): Promise<Product> {
     try {
       const sql = 'SELECT * FROM products WHERE id=($1)';
-      //@ts-expect-error any
       const conn = await Client.connect();
 
       const result = await conn.query(sql, [id]);
@@ -45,7 +42,6 @@ export class ProductStore {
     try {
       const sql =
         'INSERT INTO products (name, category, price) VALUES($1, $2, $3) RETURNING *';
-      //@ts-expect-error any
       const conn = await Client.connect();
 
       const result = await conn.query(sql, [p.name, p.category, p.price]);
@@ -63,7 +59,6 @@ export class ProductStore {
   async delete(id: string): Promise<Product> {
     try {
       const sql = 'DELETE FROM products WHERE id=($1) RETURNING *';
-      //@ts-expect-error any
       const conn = await Client.connect();
 
       const result = await conn.query(sql, [id]);
@@ -80,7 +75,6 @@ export class ProductStore {
 
   async productsByCategory(category: string): Promise<Product[]> {
     try {
-      //@ts-expect-error any
       const conn = await Client.connect();
       const sql = 'SELECT * FROM products where category = ($1)';
 
@@ -99,7 +93,6 @@ export class ProductStore {
   async top5Products(): Promise<Product[]> {
     try {
       const sql = `select products.id, products.name from products inner join order_products on products.id = order_products.id group by products.id, products.name order by count(products.id) desc limit 5`;
-      //@ts-expect-error any
       const conn = await Client.connect();
       const result = await conn.query(sql);
       return result.rows;
