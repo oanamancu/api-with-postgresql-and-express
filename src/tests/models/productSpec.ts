@@ -1,7 +1,7 @@
-import exp from 'constants';
 import { ProductStore } from '../../models/product';
 
 const store = new ProductStore()
+let productId:number;
 
 describe("Product Model", () => {
   it('should have an index method', () => {
@@ -33,9 +33,10 @@ describe("Product Model", () => {
       "name": "honey",
       "category": "sweet",
       "price": 5
-  });
+    });
+    productId = result.id as number;
     expect(result).toEqual({
-      id: 2,
+      id: productId,
       name: 'honey',
       category: 'sweet',
       price: 5
@@ -44,14 +45,14 @@ describe("Product Model", () => {
 
   it('index method should return a list of products', async () => {
     const result = await store.index();
-    expect(Object.values(result[0])).toEqual([2, 'honey', 5, 'sweet']);
+    expect(Object.values(result[0])).toEqual([productId, 'honey', 5, 'sweet']);
     expect(result.length).toEqual(1);
   });
 
   it('show method should return the correct product', async () => {
-    const result = await store.show("2");
+    const result = await store.show(String(productId));
     expect(result).toEqual({
-      id: 2,
+      id: productId,
       name: 'honey',
       category: 'sweet',
       price: 5
@@ -61,7 +62,7 @@ describe("Product Model", () => {
   it('productsByCategory method should return products with sweet category', async () => {
     const result = await store.productsByCategory("sweet");
     expect(result).toEqual([{
-      id: 2,
+      id: productId,
       name: 'honey',
       category: 'sweet',
       price: 5
@@ -74,7 +75,7 @@ describe("Product Model", () => {
   });
 
   it('delete method should remove the product', async () => {
-    await store.delete("2");
+    await store.delete(String(productId));
     expect((await store.index()).length).toEqual(0);
   });
 

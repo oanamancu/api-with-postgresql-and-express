@@ -1,13 +1,16 @@
 import { OrderStore } from '../../models/order';
 import { UserStore } from '../../models/user';
 import { ProductStore } from '../../models/product';
-import exp from 'constants';
+import { NumericLiteral } from 'typescript';
 
 const store = new OrderStore();
 const userStore = new UserStore();
 const productStore = new ProductStore(); 
 
 describe("Order Model", () => {
+
+  const userId = 4;
+  let productId:number, orderId:number;
   
   beforeAll(
     async () => {
@@ -16,11 +19,11 @@ describe("Order Model", () => {
         lastName : "one",
         password: "one"
       })
-      await productStore.create({
+      productId = (await productStore.create({
         "name": "honey",
         "category": "sweet",
         "price": 5
-    });
+    })).id as number;
   });
 
   it('should have a checkOpenOrder method', () => {
@@ -60,53 +63,53 @@ describe("Order Model", () => {
   });
 
   it('create method should add create new order for user', async () => {
-    const result = await store.createNewOrderForUser('1');
-    expect(Object.values(result)).toEqual([1, 'active', '1']);
+    const result = await store.createNewOrderForUser(String(userId));
+    orderId = result.id as number;
+    expect(Object.values(result)).toEqual([orderId, 'active', String(userId)]);
   });
 
   it('currentOrdersByUser method should return current active orders for user', async () => {
-    const result = await store.currentOrdersByUser('1');
+    const result = await store.currentOrdersByUser(String(userId));
     expect(result.length).toBe(1);
-    expect(Object.values(result[0])).toEqual([1, 'active', '1']);
+    expect(Object.values(result[0])).toEqual([orderId, 'active', String(userId)]);
   });
 
   it('checkOpenOrder return true if order is active', async () => {
-    const result = await store.checkOpenOrder('1');
+    const result = await store.checkOpenOrder(String(orderId));
     expect(result).toBeTrue();
   });
 
   it('addProduct method should add a new product to order & return it', async () => {
-    const result = await store.addProduct(4,'1','1');
-    console.log(`Result: ${Object.entries(result)}`);
-    expect(Object.values(result)).toEqual([1,4,'1','1']);
+    const result = await store.addProduct(4,String(orderId),String(productId));
+    expect(Object.values(result)).toEqual([2,4,String(orderId),String(productId)]);
   });
 
   it('productsInOrder method should return products from order', async () => {
-    const result = await store.productsInOrder('1');
+    const result = await store.productsInOrder(String(orderId));
     expect(result).toEqual([{
-      id: 1,
+      id: productId,
       name: 'honey',
       quantity: 4
     }]);
   });
 
   it('markOrderAsComplete method should mark order as complete & return it', async () => {
-    const result = await store.markOrderAsComplete('1');
-    expect(Object.values(result)).toEqual([1, 'complete', '1']);
+    const result = await store.markOrderAsComplete(String(orderId));
+    expect(Object.values(result)).toEqual([orderId, 'complete', String(userId)]);
   });
 
   it('completedOrdersByUser method should return all completed orders for user', async () => {
-    const result = await store.completedOrdersByUser('1');
-    expect(Object.values(result[0])).toEqual([1, 'complete', '1']);
+    const result = await store.completedOrdersByUser(String(userId));
+    expect(Object.values(result[0])).toEqual([orderId, 'complete', String(userId)]);
     expect(result.length).toBe(1);
   });
 
   it('addProduct method should not add product in complete order', async () => {
-    await expectAsync(store.addProduct(4,'2','1')).toBeRejectedWithError();
+    await expectAsync(store.addProduct(4,String(orderId),String(productId))).toBeRejectedWithError();
   });
 
   it('checkOpenOrder return false if order is active', async () => {
-    const result = await store.checkOpenOrder('1');
+    const result = await store.checkOpenOrder(String(orderId));
     expect(result).toBeFalse();
   });
 
@@ -114,21 +117,21 @@ describe("Order Model", () => {
     expect(await productStore.top5Products()).toBeTruthy();
   });
 
-  it('delete method should remove the order', async () => {
-    await store.deleteProductFromOrder('1', '1')
-    expect(await store.productsInOrder('1')).toEqual(null);
+  it('delete method should remove product from order', async () => {
+    await store.deleteProductFromOrder(String(orderId), String(productId))
+    expect(await store.productsInOrder(String(orderId))).toEqual(null);
   });
 
   it('delete method should remove the order', async () => {
-    store.delete("1");
-    const result = await store.currentOrdersByUser('1')
+    store.delete(String(orderId));
+    const result = await store.currentOrdersByUser(String(userId))
     expect(result).toEqual([]);
   });
 
   afterAll(
     async () => {
-      await userStore.delete("1");
-      await productStore.delete("1");
+      await userStore.delete(String(userId));
+      await productStore.delete(String(productId));
   });
 
 });

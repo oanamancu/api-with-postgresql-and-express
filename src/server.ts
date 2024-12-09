@@ -19,3 +19,5 @@ app.get('/', function (_req: express.Request, res: express.Response) {
 app.listen(3000, function () {
   console.log(`starting app on: ${address}`);
 });
+
+export default app;
