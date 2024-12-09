@@ -48,10 +48,7 @@ const authenticate = async (req: Request, res: Response) => {
     password: req.body.password
   };
   try {
-    const u = await store.authenticate(
-      user.id,
-      user.password
-    );
+    const u = await store.authenticate(user.id, user.password);
     const token = jwt.sign({ user: u }, String(process.env.TOKEN_SECRET));
     res.status(200).json(token);
   } catch (error) {
@@ -67,7 +64,7 @@ const update = async (req: Request, res: Response) => {
     password: req.body.password
   };
 
-  try { 
+  try {
     if (req.body.decoded.user.id !== user.id) {
       throw new Error('User id does not match!');
     }

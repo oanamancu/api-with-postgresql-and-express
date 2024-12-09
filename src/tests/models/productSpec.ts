@@ -1,9 +1,9 @@
 import { ProductStore } from '../../models/product';
 
-const store = new ProductStore()
-let productId:number;
+const store = new ProductStore();
+let productId: number;
 
-describe("Product Model", () => {
+describe('Product Model', () => {
   it('should have an index method', () => {
     expect(store.index).toBeDefined();
   });
@@ -30,9 +30,9 @@ describe("Product Model", () => {
 
   it('create method should add a product', async () => {
     const result = await store.create({
-      "name": "honey",
-      "category": "sweet",
-      "price": 5
+      name: 'honey',
+      category: 'sweet',
+      price: 5
     });
     productId = result.id as number;
     expect(result).toEqual({
@@ -60,17 +60,19 @@ describe("Product Model", () => {
   });
 
   it('productsByCategory method should return products with sweet category', async () => {
-    const result = await store.productsByCategory("sweet");
-    expect(result).toEqual([{
-      id: productId,
-      name: 'honey',
-      category: 'sweet',
-      price: 5
-    }]);
+    const result = await store.productsByCategory('sweet');
+    expect(result).toEqual([
+      {
+        id: productId,
+        name: 'honey',
+        category: 'sweet',
+        price: 5
+      }
+    ]);
   });
 
   it('productsByCategory method should return empty array with drink category', async () => {
-    const result = await store.productsByCategory("drink");
+    const result = await store.productsByCategory('drink');
     expect(result).toEqual([]);
   });
 
@@ -78,5 +80,4 @@ describe("Product Model", () => {
     await store.delete(String(productId));
     expect((await store.index()).length).toEqual(0);
   });
-
 });

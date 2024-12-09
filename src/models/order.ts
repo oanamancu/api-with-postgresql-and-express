@@ -1,4 +1,3 @@
-import { Console } from 'console';
 import Client from '../database';
 
 export type Order = {
@@ -32,15 +31,11 @@ export class OrderStore {
   }
 
   //method to attach a product to an order
-  async addProduct(
-    quantity: number,
-    orderId: string,
-    productId: string
-  ) {
+  async addProduct(quantity: number, orderId: string, productId: string) {
     try {
       const isOpen = await this.checkOpenOrder(orderId);
       if (!isOpen) {
-        throw new Error ('order is closed');
+        throw new Error('order is closed');
       }
       const sql =
         'INSERT INTO order_products (quantity, order_id, product_id) VALUES($1, $2, $3) RETURNING *';
@@ -130,11 +125,11 @@ export class OrderStore {
 
   async markOrderAsComplete(orderId: string) {
     try {
-      const sql =
-        `UPDATE orders set status = 'complete' where id = ($1) RETURNING *`;
+      const sql = `UPDATE orders set status = 'complete' where id = ($1) RETURNING *`;
       const conn = await Client.connect();
       const result = await conn.query(sql, [orderId]);
-      const order = result.rows[0]; console.log(result.rowCount);
+      const order = result.rows[0];
+      console.log(result.rowCount);
       conn.release();
       return order;
     } catch (err) {

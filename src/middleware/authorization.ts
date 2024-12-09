@@ -13,7 +13,7 @@ export const verifyAuthToken = (
     const authorizationHeader = String(req.headers.authorization);
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.verify(token, String(process.env.TOKEN_SECRET));
-    
+
     req.body.decoded = decoded;
     next();
   } catch (error) {

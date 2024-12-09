@@ -1,8 +1,8 @@
 import { UserStore } from '../../models/user';
 
-const store = new UserStore()
+const store = new UserStore();
 
-describe("User Model", () => {
+describe('User Model', () => {
   const userId = 5;
 
   it('should have an index method', () => {
@@ -31,10 +31,10 @@ describe("User Model", () => {
 
   it('create method should add a user', async () => {
     const result = await store.create({
-        firstName : "one",
-        lastName : "one",
-        password: "one"
-    }); 
+      firstName: 'one',
+      lastName: 'one',
+      password: 'one'
+    });
     expect(result['firstname']).toEqual('one');
     expect(result['lastname']).toEqual('one');
   });
@@ -53,7 +53,7 @@ describe("User Model", () => {
   });
 
   it('authenticate method should return user if successful', async () => {
-    const result = await store.authenticate(userId, "one");
+    const result = await store.authenticate(userId, 'one');
     expect(result['firstname']).toEqual('one');
     expect(result['lastname']).toEqual('one');
     expect(result.id).toBe(userId);
@@ -61,11 +61,11 @@ describe("User Model", () => {
 
   it('update method should return updated user', async () => {
     const result = await store.update({
-        firstName : "two",
-        lastName : "two",
-        password: "two",
-        id: userId
-  }); 
+      firstName: 'two',
+      lastName: 'two',
+      password: 'two',
+      id: userId
+    });
     expect(result['firstname']).toEqual('two');
     expect(result['lastname']).toEqual('two');
     expect(result.id).toBe(userId);
@@ -73,9 +73,8 @@ describe("User Model", () => {
 
   it('delete method should remove the user', async () => {
     await store.delete(String(userId));
-    const result = await store.index()
+    const result = await store.index();
 
     expect(result).toEqual([]);
   });
-
 });

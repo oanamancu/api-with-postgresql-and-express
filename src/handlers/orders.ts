@@ -78,19 +78,24 @@ const markOrderAsComplete = async (req: Request, res: Response) => {
 
 const orderRoutes = (app: express.Application) => {
   app.post('/orders/:orderId/products', verifyAuthToken, addProductToOrder);
-  app.get('/orders/current/:userId/users', verifyAuthToken, currentOrdersByUser);
-  app.get('/orders/completed/:userId/users',
+  app.get(
+    '/orders/current/:userId/users',
+    verifyAuthToken,
+    currentOrdersByUser
+  );
+  app.get(
+    '/orders/completed/:userId/users',
     verifyAuthToken,
     completedOrdersByUser
-  ); 
-  app.get('/orders/:orderId/products', verifyAuthToken, productsInOrder); 
-  app.post('/orders', verifyAuthToken, createNewOrderForUser); 
+  );
+  app.get('/orders/:orderId/products', verifyAuthToken, productsInOrder);
+  app.post('/orders', verifyAuthToken, createNewOrderForUser);
   app.delete(
     '/orders/:orderId/products/:productId',
     verifyAuthToken,
     deleteProductFromOrder
-  ); 
-  app.put('/orders/complete/:id',markOrderAsComplete);
+  );
+  app.put('/orders/complete/:id', markOrderAsComplete);
 };
 
 export default orderRoutes;

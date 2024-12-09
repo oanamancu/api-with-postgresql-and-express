@@ -53,14 +53,13 @@ const productsByCategory = async (req: Request, res: Response) => {
 };
 
 const topProducts = async (_req: Request, res: Response) => {
-  try { 
+  try {
     const products = await store.top5Products();
     res.status(200).json(products);
-  } catch (err) { 
+  } catch (err) {
     res.status(500).json(err);
   }
 };
-
 
 const productRoutes = (app: express.Application) => {
   app.get('/products', index);
